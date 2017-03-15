@@ -19,6 +19,7 @@ psql -d $USER
 ##### Creating a table and adding contents to it
 create table darpa (src_ip varchar, dest_ip varchar, date varchar, time varchar, atype varchar);         To add darpa.csv
 \copy darpa FROM '/afs/andrew.cmu.edu/usr19/prakrutp/private/multimedia_project/15-826-Multimedia-Project/data/darpa.csv' DELIMITER ',' CSV
+** \copy darpa FROM '/afs/andrew.cmu.edu/usr13/marora/private/15826/15-826-Multimedia-Project/data/darpa.csv' DELIMITER ',' CSV
 
 ##### Check on the table
 select * from darpa limit 10;
@@ -50,3 +51,36 @@ select * from darpa_agg limit 10;
  017.139.040.007 | 172.016.114.050 | 06/03/98   |     1
  017.139.040.008 | 172.016.114.050 | 06/03/98   |     1
  017.139.040.011 | 172.016.114.050 | 06/03/98   |     1
+
+### Creating User defined functions
+ Example: 
+ CREATE FUNCTION add(integer, integer) RETURNS integer AS $$
+    SELECT $1 + $2;
+ $$ LANGUAGE SQL;
+ Calling the function - SELECT add(1, 2) AS answer; or just SELECT add(1,2);
+
+ Note - Every function which does not return void has to end with a 'select statement'
+ Otherwise: 
+ 	CREATE FUNCTION clean_darpa() RETURNS void AS $$
+    	DELETE FROM darpa_agg
+        	WHERE count < 0;
+	$$ LANGUAGE SQL;
+	SELECT clean_darpa();
+ ## More advanced functions:
+ 	CREATE OR REPLACE FUNCTION fib (fib_for integer) RETURNS integer AS $$
+ 		BEGIN
+ 			IF fib_for < 2 THEN
+				RETURN fib_for;
+			END IF;
+				RETURN fib(fib_for - 2) + fib(fib_for - 1);
+		END;
+	$$ LANGUAGE plpgsql;
+	plpgsql documentation - https://www.postgresql.org/docs/current/static/plpgsql.html
+
+ ## How to run?
+ psql -U marora -d test -a -f src/test.sql (Check the file path)
+
+
+
+
+
