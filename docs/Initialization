@@ -10,3 +10,10 @@ pg_ctl -D $HOME/826prj stop
 
 ###### To get SQL prompt
 psql -d $USER
+
+###### Postgress commands
+\list            To list all databases
+\connect prakrutp        To connect to database prakrutp (created by our earlier command)
+\d         To show all tables, views, relations
+create table darpa (src_ip varchar, dest_ip varchar, date varchar, time varchar, atype varchar);         To add darpa.csv
+\copy darpa FROM '/afs/andrew.cmu.edu/usr19/prakrutp/private/multimedia_project/15-826-Multimedia-Project/data/darpa.csv' DELIMITER ',' CSV
