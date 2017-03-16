@@ -1,7 +1,7 @@
 export PGPORT=15790
 export PGHOST=/tmp
 initdb /afs/andrew.cmu.edu/usr19/prakrutp/826prj
-pg_ctl -D /afs/andrew.cmu.edu/usr19/prakrutp/826prj -o '-k /tmp'
+pg_ctl -D $HOME/826prj -o '-k /tmp' start
 createdb prakrutp
 
 
