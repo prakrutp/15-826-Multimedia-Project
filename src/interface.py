@@ -34,9 +34,9 @@ def createInputTable(cur):
         inp_param = 'CREATE TABLE input_table(' + inp_param + 'count INTEGER)'
         cur.execute(inp_param)
         sys.stdout.write("Input Table created\n")
-        inp_param = 'COPY input_table FROM "' + INPUT_CSV + '" DELIMITER AS "' + INPUT_DELIMITER + '" CSV'
+        inp_param = "COPY input_table FROM '" + INPUT_CSV + "' DELIMITER AS '" + INPUT_DELIMITER + "' CSV"
         cur.execute(inp_param)
-        sys.stdout.write("Data from CSV input to the input_table")
+        sys.stdout.write("Data from CSV input to the input_table\n")
     except:
         sys.exit("Input table creation failed\n")
 
