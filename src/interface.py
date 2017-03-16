@@ -6,9 +6,14 @@ from constants import *
 #### Function to connect to the database
 def connectDB():
     try:
-        conn = psycopg2.connect(dbname=DBNAME, user=USERNAME, host=PGHOST, port=PGPORT)
-    except:
-        sys.exit("Unable to connect to the database\n")
+        sys.stdout.write("Connecting to " + DBNAME +
+                          " DB on Port - " + str(PGPORT) +
+                          " Host - " + PGHOST +
+                          " for User " + USERNAME + "\n")
+        # conn = psycopg2.connect(dbname=DBNAME, user=USERNAME, host=PGHOST, port=PGPORT)
+        conn = psycopg2.connect(dbname=DBNAME, user=USERNAME)
+    except Exception as e:
+        sys.exit("Unable to connect to the database\n" + str(e))
 
     cur = conn.cursor()
     sys.stdout.write("Established connection to the database\n")
@@ -33,7 +38,7 @@ def createInputTable(cur):
             inp_param += tmp
         inp_param = 'CREATE TABLE input_table(' + inp_param + 'count INTEGER)'
         cur.execute(inp_param)
-        sys.stdout.write("Input Table created\n")
+        sys.stdout.write("Input Table - " + inp_param +  " created\n")
         inp_param = "COPY input_table FROM '" + INPUT_CSV + "' DELIMITER AS '" + INPUT_DELIMITER + "' CSV"
         cur.execute(inp_param)
         sys.stdout.write("Data from CSV input to the input_table\n")
