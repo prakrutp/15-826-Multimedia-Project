@@ -1,4 +1,5 @@
 #### DB parameters - prakrutp
+
 DBNAME = 'prakrutp'
 USERNAME = 'prakrutp'
 PGHOST = '/tmp'
@@ -6,6 +7,7 @@ PGPORT = 15790
 ## Please provide full path
 OUTPUT_LOCATION = '/afs/andrew.cmu.edu/usr19/prakrutp/private/multimedia_project/15-826-Multimedia-Project/output/blocks.txt'
 INPUT_CSV = '/afs/andrew.cmu.edu/usr19/prakrutp/private/multimedia_project/15-826-Multimedia-Project/data/test.csv'
+
 
 #### DB parameters - marora
 """
@@ -26,5 +28,6 @@ NUM_ATTRIBUTES = 3
 NUM_DENSE_BLOCKS = 1
 ## One among 'A', 'G', 'S'
 DENSITY_MEASURE = 'A'
-POLICY = ''
+## One among 'C', 'D'
+POLICY = 'C'
 
