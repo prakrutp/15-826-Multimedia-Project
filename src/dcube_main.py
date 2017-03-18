@@ -34,9 +34,32 @@ def getAttributeValuesMass(cur, name, attributes, distinctValuesForAttributes):
 			attributeValuesMass[i][val] = mass
 	return attributeValuesMass
 
-#TODO
-def selectDimensionbyDensity():
-	return -1
+def selectDimensionbyDensity(inpDistinctValuesForAttributes, inpMass, attributeValuesMass, rho):
+	currDensity = -1
+	dimFinal = 0
+	mass = copy.deepcopy(inpMass)
+	distinctValuesForAttributes = copy.deepcopy(inpDistinctValuesForAttributes)
+	cardinalities = [len(arr) for arr in distinctValuesForAttributes]
+
+	for dim, distinctValues in enumerate(distinctValuesForAttributes):
+		if len(distinctValues) != 0:
+			removeCandidates = []
+			D = attributeValuesMass[dim]
+			massThreshold = (float(mass))/(float(len(distinctValuesForAttributes[dim])))
+			for val, valMass in sorted(D.items(), key=lambda x: x[1]):
+				if valMass <= massThreshold:
+					removeCandidates.append(val)
+
+			for i, candidate in enumerate(removeCandidates):
+				mass -= attributeValuesMass[dim][candidate]
+				distinctValuesForAttributes[dim].remove(candidate)
+				cardinalities[dim] -= 1
+
+			newDensity = getDensity(rho, len(cardinalities), cardinalities, mass)
+			if newDensity > currDensity:
+				currDensity = newDensity
+				dimFinal = dim
+	return dimFinal
 
 def selectDimensionbyCardinality(distinctValuesForAttributes):
 	maxIndex = -1
@@ -48,13 +71,12 @@ def selectDimensionbyCardinality(distinctValuesForAttributes):
 			maxIndex = i
 	return maxIndex
 
-def selectDimension(policy, distinctValuesForAttributes):
+def selectDimension(policy, distinctValuesForAttributes, mass, attributeValuesMass, rho):
 	if policy == 'C':
 		return selectDimensionbyCardinality(distinctValuesForAttributes)
 	elif policy == 'D':
-		return selectDimensionbyDensity()
+		return selectDimensionbyDensity(distinctValuesForAttributes, mass, attributeValuesMass, rho)
 	sys.exit("Error: Policy Not Known\n")
-
 
 def findSingleBlock(cur, name, distinctValuesForAttributes, mass, attributes, rho, policy):
 	tableCopy(cur, name, 'block')
@@ -78,7 +100,7 @@ def findSingleBlock(cur, name, distinctValuesForAttributes, mass, attributes, rh
 		print "++++++ Iter no of while loop: ",iterno
 		attributeValuesMass = getAttributeValuesMass(cur, 'block', attributes, distinctValuesForAttributes_B)
 		print "attributeValuesMass: ", attributeValuesMass
-		dim = selectDimension(policy, distinctValuesForAttributes_B)
+		dim = selectDimension(policy, distinctValuesForAttributes_B, mass_B, attributeValuesMass, rho)
 		print "Selected dimension: ",dim
 		if not order.has_key(dim):
 			order[dim] = dict()
