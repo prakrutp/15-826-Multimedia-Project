@@ -29,9 +29,9 @@ def suspiciousnessDensity(dimension, cardinalities_B, mass_B, cardinalities_R, m
 def getDensity(rho, N, cardinalities, mass):
     if rho == 'A':
         return arithmeticDensity(N, cardinalities, mass)
-    else if rho == 'G':
+    elif rho == 'G':
         return geometricDensity(N, cardinalities, mass)
-    else if rho == 'S':
+    elif rho == 'S':
         #TODO
         return 0.0
     else:

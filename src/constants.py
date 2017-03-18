@@ -25,7 +25,7 @@ INPUT_DELIMITER = ','
 ## The fourth attribute is considered as count
 NUM_ATTRIBUTES = 3
 ## Number of dense blocks to be output
-NUM_DENSE_BLOCKS = 1
+NUM_DENSE_BLOCKS = 3
 ## One among 'A', 'G', 'S'
 DENSITY_MEASURE = 'A'
 ## One among 'C', 'D'

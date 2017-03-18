@@ -8,7 +8,7 @@ def findCardinalities(cur, name, attributes):
     cardinalities = []
     distinctValuesForAttributes = []
     
-    for attribute in attributes[:-1]:
+    for attribute in attributes:
         distinctValuesForAttribute = []
         cur.execute("SELECT DISTINCT " + attribute[0] +" FROM " + name)
         distinctValues = cur.fetchall()
@@ -21,17 +21,19 @@ def findCardinalities(cur, name, attributes):
 
 def findMass(cur, name):
     cur.execute("SELECT SUM(count) FROM "+ name)
-    return int(cur.fetchall()[0][0])
+    result = cur.fetchall()[0][0]
+    if result==None:
+        return 0
+    return int(result)
 
-def copy(cur, name, new_name):
+def tableCopy(cur, name, new_name):
     cur.execute("DROP TABLE IF EXISTS " + new_name)
     cur.execute("CREATE TABLE " + new_name + " AS SELECT * FROM " + name)
-    return new_table
 
 def filterTable(cur, name, attributes, distinctValuesForAttributes_B):
     where_clause = ''
     for i, distinctValues in enumerate(distinctValuesForAttributes_B):
         if len(distinctValues) > 0:
-            where_clause += attributes[i][0] + " IN ("+ ','.join(distinctValues) + ") AND "
+            where_clause += attributes[i][0] + " IN ('"+ "','".join(distinctValues) + "') AND "
     cur.execute("DELETE FROM " + name + " WHERE " + where_clause[:-5])
     return
