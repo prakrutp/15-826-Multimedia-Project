@@ -28,7 +28,7 @@ NUM_ATTRIBUTES = 3
 ## Number of dense blocks to be output
 NUM_DENSE_BLOCKS = 3
 ## One among 'A', 'G', 'S'
-DENSITY_MEASURE = 'G'
+DENSITY_MEASURE = 'S'
 ## One among 'C', 'D'
-POLICY = 'C'
+POLICY = 'D'
 

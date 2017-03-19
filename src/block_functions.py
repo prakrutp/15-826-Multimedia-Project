@@ -26,6 +26,28 @@ def findMass(cur, name):
         return 0
     return int(result)
 
+# Check if any attribute has values
+def checkEmptyCardinalities(distinctValuesForAttributes):
+    for distinctValues in distinctValuesForAttributes:
+        if len(distinctValues) != 0:
+            return True
+    return False
+
+def getAttributeValuesMass(cur, name, attributes, distinctValuesForAttributes):
+    attributeValuesMass = dict()
+    for i, attribute in enumerate(attributes):
+        attributeValuesMass[i] = dict()
+        for val in distinctValuesForAttributes[i]:
+            sql_query = "SELECT SUM(count) FROM " + name + " WHERE " + attribute[0] + "='" + val + "'"
+            cur.execute(sql_query)
+            result = cur.fetchall()[0][0]
+            if result==None:
+                mass = 0
+            else:
+                mass = int(result)
+            attributeValuesMass[i][val] = mass
+    return attributeValuesMass
+
 def tableCopy(cur, name, new_name):
     cur.execute("DROP TABLE IF EXISTS " + new_name)
     cur.execute("CREATE TABLE " + new_name + " AS SELECT * FROM " + name)
