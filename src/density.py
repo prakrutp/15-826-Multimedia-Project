@@ -26,13 +26,13 @@ def suspiciousnessDensity(dimension, cardinalities_B, mass_B, cardinalities_R, m
         + mass_R * (productOfCardinalities_B / productOfCardinalities_R) 
         - mass_B * math.log(productOfCardinalities_B / productOfCardinalities_R))
 
-def getDensity(rho, N, cardinalities, mass):
+def getDensity(rho, N, cardinalities_B, mass_B, cardinalities_R, mass_R):
     if rho == 'A':
-        return arithmeticDensity(N, cardinalities, mass)
+        return arithmeticDensity(N, cardinalities_B, mass_B)
     elif rho == 'G':
-        return geometricDensity(N, cardinalities, mass)
+        return geometricDensity(N, cardinalities_B, mass_B)
     elif rho == 'S':
         #TODO
-        return 0.0
+        return suspiciousnessDensity(N, cardinalities_B, mass_B, cardinalities_R, mass_R)
     else:
         sys.exit("Error: Density Measure Not Known\n")

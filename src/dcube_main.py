@@ -8,9 +8,8 @@ from block_functions import *
 from density import *
 import copy
 
-def writeBlock(block, output):
-    #TODO: Prettify
-    output.write(str(block)+'\n')
+def writeBlockDensity(output, block_density, block_num):
+	output.write(str(block_num) + ' : ' + str(block_density) + '\n')
 
 # Check if any attribute has values
 def checkEmptyCardinalities(distinctValuesForAttributes):
@@ -34,29 +33,28 @@ def getAttributeValuesMass(cur, name, attributes, distinctValuesForAttributes):
 			attributeValuesMass[i][val] = mass
 	return attributeValuesMass
 
-def selectDimensionbyDensity(inpDistinctValuesForAttributes, inpMass, attributeValuesMass, rho):
+def selectDimensionbyDensity(inpDistinctValuesForAttributes, mass, attributeValuesMass, rho, cardinalities_R, mass_R):
 	currDensity = -1
 	dimFinal = 0
-	mass = copy.deepcopy(inpMass)
-	distinctValuesForAttributes = copy.deepcopy(inpDistinctValuesForAttributes)
-	cardinalities = [len(arr) for arr in distinctValuesForAttributes]
-
-	for dim, distinctValues in enumerate(distinctValuesForAttributes):
+	for dim in xrange(len(inpDistinctValuesForAttributes)):
+		mass_updated = copy.deepcopy(mass)
+		distinctValuesForAttributes = copy.deepcopy(inpDistinctValuesForAttributes)
+		cardinalities = [len(arr) for arr in distinctValuesForAttributes]
+		distinctValues = distinctValuesForAttributes[dim]
 		if len(distinctValues) != 0:
 			removeCandidates = []
 			D = attributeValuesMass[dim]
-			massThreshold = (float(mass))/(float(len(distinctValuesForAttributes[dim])))
-			for val, valMass in sorted(D.items(), key=lambda x: x[1]):
+			massThreshold = (float(mass_updated))/(float(len(distinctValues)))
+			for val, valMass in D.items():
 				if valMass <= massThreshold:
 					removeCandidates.append(val)
 
 			for i, candidate in enumerate(removeCandidates):
-				mass -= attributeValuesMass[dim][candidate]
+				mass_updated -= D[candidate]
 				distinctValuesForAttributes[dim].remove(candidate)
 				cardinalities[dim] -= 1
-
-			newDensity = getDensity(rho, len(cardinalities), cardinalities, mass)
-			if newDensity > currDensity:
+			newDensity = getDensity(rho, len(cardinalities), cardinalities, mass_updated, cardinalities_R, mass_R)
+			if newDensity >= currDensity:
 				currDensity = newDensity
 				dimFinal = dim
 	return dimFinal
@@ -71,22 +69,25 @@ def selectDimensionbyCardinality(distinctValuesForAttributes):
 			maxIndex = i
 	return maxIndex
 
-def selectDimension(policy, distinctValuesForAttributes, mass, attributeValuesMass, rho):
+def selectDimension(policy, distinctValuesForAttributes, mass, 
+					attributeValuesMass, rho, cardinalities_R, mass_R):
 	if policy == 'C':
 		return selectDimensionbyCardinality(distinctValuesForAttributes)
 	elif policy == 'D':
-		return selectDimensionbyDensity(distinctValuesForAttributes, mass, attributeValuesMass, rho)
+		return selectDimensionbyDensity(distinctValuesForAttributes, mass, 
+										attributeValuesMass, rho, cardinalities_R, mass_R)
 	sys.exit("Error: Policy Not Known\n")
 
 def findSingleBlock(cur, name, distinctValuesForAttributes, mass, attributes, rho, policy):
 	tableCopy(cur, name, 'block')
-	mass_B = mass
+	mass_B = copy.deepcopy(mass)
 	distinctValuesForAttributes_B = copy.deepcopy(distinctValuesForAttributes)
 	print "distinctValuesForAttributes_B: ",distinctValuesForAttributes_B
 	print "mass_B: ", mass_B
 	N = len(attributes)
-	cardinalities = [len(arr) for arr in distinctValuesForAttributes_B]
-	currDensity = getDensity(rho, N, cardinalities, mass)
+	cardinalities_R = [len(arr) for arr in distinctValuesForAttributes_B]
+	cardinalities = copy.deepcopy(cardinalities_R)
+	currDensity = getDensity(rho, N, cardinalities, mass, cardinalities, mass)
 	print "cardinalities: ",cardinalities
 	print "currDensity: ", currDensity
 
@@ -100,7 +101,8 @@ def findSingleBlock(cur, name, distinctValuesForAttributes, mass, attributes, rh
 		print "++++++ Iter no of while loop: ",iterno
 		attributeValuesMass = getAttributeValuesMass(cur, 'block', attributes, distinctValuesForAttributes_B)
 		print "attributeValuesMass: ", attributeValuesMass
-		dim = selectDimension(policy, distinctValuesForAttributes_B, mass_B, attributeValuesMass, rho)
+		dim = selectDimension(policy, distinctValuesForAttributes_B, mass_B, 
+								attributeValuesMass, rho, cardinalities_R, mass)
 		print "Selected dimension: ",dim
 		if not order.has_key(dim):
 			order[dim] = dict()
@@ -117,7 +119,7 @@ def findSingleBlock(cur, name, distinctValuesForAttributes, mass, attributes, rh
 			mass_B -= attributeValuesMass[dim][candidate]
 			distinctValuesForAttributes_B[dim].remove(candidate)
 			cardinalities[dim] -= 1
-			newDensity = getDensity(rho, N, cardinalities, mass_B)
+			newDensity = getDensity(rho, N, cardinalities, mass_B, cardinalities_R, mass)
 			print "Mass: ", mass_B
 			print "distinctValuesForAttributes_B: ", distinctValuesForAttributes_B
 			print "newDensity: ", newDensity
@@ -142,29 +144,39 @@ def findSingleBlock(cur, name, distinctValuesForAttributes, mass, attributes, rh
 	return newBlock
 
 
-def extractBlock(cur, name, attributes, distinctValuesForAttributes_B):
+def extractBlock(cur, name, attributes, distinctValuesForAttributes_B, block_num):
 	where_clause = ''
 	for i, distinctValues in enumerate(distinctValuesForAttributes_B):
 		where_clause += attributes[i][0] + " IN ('" + "','".join(distinctValues) + "') AND "
-	cur.execute("SELECT * FROM " + name + " WHERE " + where_clause[:-5])
-	return cur.fetchall()
+	# col_names = ' (blockId, '
+	# for attribute in attributes:
+	# 	col_names += attribute[0] + ', '
+	# col_names += 'count)'
+	sql_query = "INSERT INTO " + OUTPUT_TABLE_NAME + " SELECT " + str(block_num) + ", * FROM " + name + " WHERE " + where_clause[:-5]
+	print 'SQL', sql_query
+	cur.execute(sql_query)
+	sql_query = "SELECT SUM(count) FROM " + name + " WHERE " + where_clause[:-5]
+	cur.execute(sql_query)
+	mass = cur.fetchall()[0][0]
+	return mass
 
 def main():
 	#-------- SET-UP ----------
 	conn, cur = interface.connectDB()
 	interface.createInputTable(cur)
+	interface.createOutputTable(cur, OUTPUT_TABLE_NAME)
 	output = open(OUTPUT_LOCATION, 'w')
-	cur.execute("SELECT * FROM input_table")
+	cur.execute("SELECT * FROM input_table limit 10")
 	records = cur.fetchall()
 	pprint.pprint(records)
 
 	#-------- Relation/Block Definitions ----------
-	dimension = NUM_ATTRIBUTES
-	attributes = findAttributes(cur, 'input_table')
-	distinctValuesForAttributes, cardinalities = findCardinalities(cur, 'input_table', attributes)
-	print distinctValuesForAttributes, cardinalities
-	mass_R = findMass(cur, 'input_table')
-	print "Mass of Relation ", mass_R
+	# dimension = NUM_ATTRIBUTES
+	# attributes = findAttributes(cur, 'input_table')
+	# distinctValuesForAttributes, cardinalities = findCardinalities(cur, 'input_table', attributes)
+	# print distinctValuesForAttributes, cardinalities
+	# mass_R = findMass(cur, 'input_table')
+	# print "Mass of Relation ", mass_R
 	#TODO: Define a block
 
 	"""
@@ -175,10 +187,13 @@ def main():
 	"""
 
 	#-------- ALGORITHM 1 ----------
+	dimension = NUM_ATTRIBUTES
 	tableCopy(cur, 'input_table', 'original_input_table')
 	attributes = findAttributes(cur, 'input_table')[:-1]
 	distinctValuesForAttributes_R, cardinalities_R = findCardinalities(cur, 'input_table', attributes)
+	mass_R = findMass(cur, 'input_table')
 	block_num = 0
+	block_densities = []
 	for block_num in xrange(NUM_DENSE_BLOCKS):
 		print "******* Iteration number: "+str(block_num)
 		mass_R = findMass(cur, 'input_table')
@@ -188,11 +203,18 @@ def main():
 		distinctValuesForAttributes_R, cardinalities_R = findCardinalities(cur, 'input_table', attributes)
 		distinctValuesForAttributes_B = findSingleBlock(cur, 'input_table', 
 				distinctValuesForAttributes_R, mass_R, attributes, DENSITY_MEASURE, POLICY)
+		cardinalities_B = [len(arr) for arr in distinctValuesForAttributes_B]
 		filterTable(cur, 'input_table', attributes, distinctValuesForAttributes_B)
-		block = extractBlock(cur, 'original_input_table', attributes, distinctValuesForAttributes_B)
-		writeBlock(block, output)
+		mass_B = extractBlock(cur, 'original_input_table', attributes, distinctValuesForAttributes_B, block_num)
+		block_density = getDensity(DENSITY_MEASURE, dimension, cardinalities_B, mass_B, cardinalities_R, mass_R)
+		print "BLOCK DENSITY", block_density
+		block_densities.append(block_density)
+		writeBlockDensity(output, block_density, block_num)
 
 	sys.stdout.write("Number of dense blocks found: " + str(block_num+1) + '\n')
+	cur.execute("SELECT * FROM " + OUTPUT_TABLE_NAME + "")
+	records = cur.fetchall()
+	pprint.pprint(records)
 	#-------- CLEAN-UP ----------
 	#Drop copied table
 	output.close()
