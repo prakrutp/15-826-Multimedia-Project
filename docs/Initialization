@@ -17,7 +17,7 @@ psql -d $USER
 \d         To show all tables, views, relations
 
 ##### Creating a table and adding contents to it
-create table darpa (src_ip varchar, dest_ip varchar, date varchar, time varchar, atype varchar);         To add darpa.csv
+create table darpa_full (src_ip varchar, dest_ip varchar, date varchar, time varchar, atype varchar);         To add darpa.csv
 \copy darpa FROM '/afs/andrew.cmu.edu/usr19/prakrutp/private/multimedia_project/15-826-Multimedia-Project/data/darpa.csv' DELIMITER ',' CSV
 ** \copy darpa FROM '/afs/andrew.cmu.edu/usr13/marora/private/15826/15-826-Multimedia-Project/data/darpa.csv' DELIMITER ',' CSV
 
@@ -51,6 +51,9 @@ select * from darpa_agg limit 10;
  017.139.040.007 | 172.016.114.050 | 06/03/98   |     1
  017.139.040.008 | 172.016.114.050 | 06/03/98   |     1
  017.139.040.011 | 172.016.114.050 | 06/03/98   |     1
+
+
+Copy (Select * From darpa_full_agg) To '/afs/andrew.cmu.edu/usr13/marora/private/15826/15-826-Multimedia-Project/data/darpa_full_date.csv' With CSV DELIMITER ',';
 
 ### Creating User defined functions
  Example: 
