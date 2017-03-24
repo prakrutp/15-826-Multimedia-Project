@@ -134,7 +134,7 @@ def main():
 
 	#-------- CLEAN-UP ----------
 	output.close()
-	sql_query = "Copy (Select * From " + OUTPUT_TABLE_NAME + ") To " + OUTPUT_LOCATION_BLOCKS + " With CSV DELIMITER ','";
+	sql_query = "Copy (Select * From " + OUTPUT_TABLE_NAME + ") To '" + OUTPUT_LOCATION_BLOCKS + "' With CSV DELIMITER ','";
 	cur.execute(sql_query)
 	interface.dropTable(cur, ['input_table', 'original_input_table'])
 	interface.closeDB(cur, conn)
