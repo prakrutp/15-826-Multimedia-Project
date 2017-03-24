@@ -115,7 +115,7 @@ def main():
 		if (mass_R == 0):
 			block_num -= 1
 			break;
-		distinctValuesForAttributes_R, cardinalities_R = findCardinalities(cur, 'input_table', attributes)
+		distinctValuesForAttributes_R, cardinalities_R_temp = findCardinalities(cur, 'input_table', attributes)
 		distinctValuesForAttributes_B = findSingleBlock(cur, 'input_table', 
 				distinctValuesForAttributes_R, mass_R, attributes, DENSITY_MEASURE, POLICY)
 		cardinalities_B = [len(arr) for arr in distinctValuesForAttributes_B]
