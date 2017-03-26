@@ -14,13 +14,11 @@ def connectDB():
     except Exception as e:
         sys.exit("Unable to connect to the database\n" + str(e))
 
-    cur = conn.cursor()
     sys.stdout.write("Established connection to the database\n")
-    return conn, cur
+    return conn
 
-def closeDB(cur, conn):
+def closeDB(conn):
     try:
-        cur.close()
         if conn is not None:
             conn.close()
         sys.stdout.write("Closed connection to the database\n")
@@ -51,8 +49,9 @@ def closeDB(cur, conn):
 #  001.002.003.004 , 172.016.112.050 , 06/03/1998 , 15
 #  001.002.003.004 , 172.016.114.050 , 06/04/1998 , 450
 #  017.139.040.001 , 172.016.114.050 , 06/03/1998 , 1
-def createInputTable(cur):
+def createInputTable(conn):
     try:
+        cur = conn.cursor()
         inp_param = ''
         for i in range(int(NUM_ATTRIBUTES)):
             tmp = 'Attr' + str(i) + ' VARCHAR, '
@@ -66,8 +65,9 @@ def createInputTable(cur):
         sys.exit("Input table creation failed\n" + str(e))
 
 
-def createOutputTable(cur):
+def createOutputTable(conn):
     try:
+        cur = conn.cursor()
         sql_query = ''
         for i in range(int(NUM_ATTRIBUTES)):
             tmp = 'Attr' + str(i) + ' VARCHAR, '
@@ -78,7 +78,8 @@ def createOutputTable(cur):
     except Exception as e:
         sys.exit("Output table creation failed\n" + str(e))
 
-def dropTable(cur, tables):
+def dropTable(conn, tables):
+    cur = conn.cursor()
     for table in tables:
         try:
             cur.execute("DROP TABLE IF EXISTS input_table")
