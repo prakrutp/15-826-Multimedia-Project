@@ -34,18 +34,18 @@ def findSingleBlock(conn, name, distinctValuesForAttributes, mass, attributes, r
 	distinctValuesForAttributes_B = 'distinctValuesForAttributes_B'
 	tableCopy(conn, distinctValuesForAttributes , distinctValuesForAttributes_B)
 
-	# cur.execute("SELECT * FROM " + distinctValuesForAttributes_B)		#
-	# records = cur.fetchall()		#
-	# pprint.pprint(records)		#
-	# print "mass_B: ", mass_B		#
+	# cur.execute("SELECT * FROM " + distinctValuesForAttributes_B)		#*
+	# records = cur.fetchall()		#*
+	# pprint.pprint(records)		#*
+	# print "mass_B: ", mass_B		#*
 
 	N = len(attributes)
 	cardinalities_R = findCardinalitiesFromTable(conn, distinctValuesForAttributes_B, N)
 	cardinalities = copy.deepcopy(cardinalities_R)
 	currDensity = getDensity(rho, N, cardinalities, mass, cardinalities, mass)
 
-	# print "cardinalities: ",cardinalities 		#
-	# print "currDensity: ", currDensity		#
+	# print "cardinalities: ",cardinalities 		#*
+	# print "currDensity: ", currDensity		#*
 
 	r = 1
 	rFinal = 1
@@ -62,36 +62,36 @@ def findSingleBlock(conn, name, distinctValuesForAttributes, mass, attributes, r
 	iterno = 0
 	while(checkEmptyCardinalities(conn, distinctValuesForAttributes_B)):
 		iterno +=1
-		# print "++++++ Iter no of while loop: ", iterno		#
+		# print "++++++ Iter no of while loop: ", iterno		#*
 		getAttributeValuesMass(conn, 'block', attributes, distinctValuesForAttributes_B)
 
-		# cur.execute("SELECT * FROM " + distinctValuesForAttributes_B) 		#
-		# records = cur.fetchall()		#
-		# pprint.pprint(records)		#
+		# cur.execute("SELECT * FROM " + distinctValuesForAttributes_B) 		#*
+		# records = cur.fetchall()		#*
+		# pprint.pprint(records)		#*
 
 		dim = selectDimension(conn, policy, cardinalities, distinctValuesForAttributes_B, mass_B, rho, cardinalities_R, mass)
 
-		# print "Selected dimension: ", dim		#
-		# print "Order: ",		#
-		# cur.execute("SELECT * FROM order_")		#
-		# records = cur.fetchall()		#
-		# pprint.pprint(records)		#
+		# print "Selected dimension: ", dim		#*
+		# print "Order: ",		#*
+		# cur.execute("SELECT * FROM order_")		#*
+		# records = cur.fetchall()		#*
+		# pprint.pprint(records)		#*
 
 		massThreshold = (float(mass_B))/(float(cardinalities[dim]))
 		sql_query = "UPDATE " + distinctValuesForAttributes_B + " SET attr_flag=true WHERE attr_no = " + str(dim) + " and attr_mass <= " +str(massThreshold)
 		cur.execute(sql_query)
 
 		
-		# cur.execute("SELECT * FROM " + distinctValuesForAttributes_B + " WHERE attr_no = " + str(dim) + " and attr_flag = true")		#
-		# records = cur.fetchall()		#
-		# print "Removed candidates: ", records		#
-		# print "MassThreshold: ", massThreshold		#
+		# cur.execute("SELECT * FROM " + distinctValuesForAttributes_B + " WHERE attr_no = " + str(dim) + " and attr_flag = true")		#*
+		# records = cur.fetchall()		#*
+		# print "Removed candidates: ", records		#*
+		# print "MassThreshold: ", massThreshold		#*
 
 		
-		sql_query = "SELECT * FROM " + distinctValuesForAttributes_B + " WHERE attr_no = " + str(dim) + " and attr_flag = true"
+		sql_query = "SELECT * FROM " + distinctValuesForAttributes_B + " WHERE attr_no = " + str(dim) + " and attr_flag = true ORDER BY attr_mass"
 		cur.execute(sql_query)
 		for i, candidate in enumerate(cur):
-			# print "------ Iter no of for loop: ", i 		#
+			# print "------ Iter no of for loop: ", i 		#*
 
 			mass_B -= int(candidate[2])
 			sql_query = "DELETE FROM " + distinctValuesForAttributes_B + " WHERE attr_no = " + str(dim) + " and attr_val = '"+ candidate[1] + "'"
@@ -99,33 +99,33 @@ def findSingleBlock(conn, name, distinctValuesForAttributes, mass, attributes, r
 			cardinalities[dim] -= 1
 			newDensity = getDensity(rho, N, cardinalities, mass_B, cardinalities_R, mass)
 
-			# print "Mass: ", mass_B 		#
-			# print "distinctValuesForAttributes_B: ",		#
-			# cur1.execute("SELECT * FROM " + distinctValuesForAttributes_B)		#
-			# records = cur1.fetchall()		#
-			# pprint.pprint(records)		#
-			# print "newDensity: ", newDensity		#
+			# print "Mass: ", mass_B 		#*
+			# print "distinctValuesForAttributes_B: ",		#*
+			# cur1.execute("SELECT * FROM " + distinctValuesForAttributes_B)		#*
+			# records = cur1.fetchall()		#*
+			# pprint.pprint(records)		#*
+			# print "newDensity: ", newDensity		#*
 			
 			sql_query = "UPDATE order_ SET attr_order = " + str(r) + " WHERE attr_no = " + str(dim) + " and attr_val = '"+ candidate[1] + "'"
 			cur1.execute(sql_query)
 			r += 1
 			if newDensity > currDensity:
-				# print "Updating......."		#
+				# print "Updating......."		#*
 				currDensity = newDensity
 				rFinal = r
 
 			sql_query = "DELETE FROM block WHERE " + attributes[dim][0] + " = '" + candidate[1] + "'"
 			cur1.execute(sql_query)
 
-		# print "Order: ",		#
-		# cur.execute("SELECT * FROM order_")		#
-		# records = cur.fetchall()		#
-		# pprint.pprint(records)		#
+		# print "Order: ",		#*
+		# cur.execute("SELECT * FROM order_")		#*
+		# records = cur.fetchall()		#*
+		# pprint.pprint(records)		#*
 
-	# print "newBlock: ",		#
-	# sql_query = "SELECT * FROM order_ WHERE attr_order >= " + str(rFinal)		#
-	# cur.execute(sql_query)		#
-	# print cur.fetchall()		#
+	# print "newBlock: ",		#*
+	# sql_query = "SELECT * FROM order_ WHERE attr_order >= " + str(rFinal)		#*
+	# cur.execute(sql_query)		#*
+	# print cur.fetchall()		#*
 	return rFinal
 
 def main():
@@ -139,7 +139,7 @@ def main():
 	# cur.execute('SELECT * FROM input_table limit 10')
 	# records = cur.fetchall()
 	# pprint.pprint(records)
-	sys.stdout.write("Finding " + str(NUM_DENSE_BLOCKS) + ' blocks\nDensity Measure Used: ' + DENSITY_MEASURE + '\nPolicy Used: ' + POLICY + '\n')
+	sys.stdout.write("Trying to find " + str(NUM_DENSE_BLOCKS) + ' blocks\nDensity Measure Used: ' + DENSITY_MEASURE + '\nPolicy Used: ' + POLICY + '\n')
 
 	#-------- ALGORITHM 1 ----------
 	dimension = NUM_ATTRIBUTES
@@ -162,18 +162,16 @@ def main():
 		mass_B = extractBlock(conn, 'original_input_table', attributes, rFinal, block_num)
 		cardinalities_B = findNewBlockCardinalitiesFromTable(conn, attributes, rFinal)
 		block_density = getDensity(DENSITY_MEASURE, dimension, cardinalities_B, mass_B, cardinalities_R, mass_R)
-		# cur.execute('SELECT * FROM input_table limit 10')		#
-		# records = cur.fetchall()		#
-		# pprint.pprint(records)		#
+
 		print "Block found with Density ", block_density
 		block_densities.append(block_density)
 		writeBlockDensity(output, block_density, block_num)
 
 	sys.stdout.write("Number of dense blocks found: " + str(block_num+1) + '\n')
 
-	# cur.execute("SELECT * FROM " + OUTPUT_TABLE_NAME + " LIMIT 10")		#
-	# records = cur.fetchall()		#
-	# pprint.pprint(records)		#
+	# cur.execute("SELECT * FROM " + OUTPUT_TABLE_NAME + " LIMIT 10")		#*
+	# records = cur.fetchall()		#*
+	# pprint.pprint(records)		#*
 
 	#-------- CLEAN-UP ----------
 	output.close()
