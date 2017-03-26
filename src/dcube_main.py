@@ -110,7 +110,7 @@ def main():
 	block_num = 0; block_densities = []
 
 	for block_num in xrange(NUM_DENSE_BLOCKS):
-		print "******* Block number: "+str(block_num)
+		print "*** Finding Block "+str(block_num)
 		mass_R = findMass(cur, 'input_table')
 		if (mass_R == 0):
 			block_num -= 1
@@ -122,13 +122,13 @@ def main():
 		filterTable(cur, 'input_table', attributes, distinctValuesForAttributes_B)
 		mass_B = extractBlock(cur, 'original_input_table', attributes, distinctValuesForAttributes_B, block_num)
 		block_density = getDensity(DENSITY_MEASURE, dimension, cardinalities_B, mass_B, cardinalities_R, mass_R)
-		print "BLOCK DENSITY", block_density
+		print "Block found with Density ", block_density
 		block_densities.append(block_density)
 		writeBlockDensity(output, block_density, block_num)
 
 	sys.stdout.write("Number of dense blocks found: " + str(block_num+1) + '\n')
 
-	cur.execute("SELECT * FROM " + OUTPUT_TABLE_NAME + "")
+	cur.execute("SELECT * FROM " + OUTPUT_TABLE_NAME + " LIMIT 10")
 	records = cur.fetchall()
 	pprint.pprint(records)
 

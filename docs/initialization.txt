@@ -19,7 +19,7 @@ psql -d $USER
 ##### Creating a table and adding contents to it
 create table darpa_full (src_ip varchar, dest_ip varchar, date varchar, time varchar, atype varchar);         To add darpa.csv
 \copy darpa FROM '/afs/andrew.cmu.edu/usr19/prakrutp/private/multimedia_project/15-826-Multimedia-Project/data/darpa.csv' DELIMITER ',' CSV
-** \copy darpa FROM '/afs/andrew.cmu.edu/usr13/marora/private/15826/15-826-Multimedia-Project/data/darpa.csv' DELIMITER ',' CSV
+** \copy darpa_full FROM '/afs/andrew.cmu.edu/usr13/marora/private/15826/15-826-Multimedia-Project/data/darpa.csv' DELIMITER ',' CSV
 
 ##### Check on the table
 select * from darpa limit 10;
@@ -54,6 +54,8 @@ select * from darpa_agg limit 10;
 
 
 Copy (Select * From darpa_full_agg) To '/afs/andrew.cmu.edu/usr13/marora/private/15826/15-826-Multimedia-Project/data/darpa_full_date.csv' With CSV DELIMITER ',';
+
+Copy (select src_ip, dest_ip, date,split_part(time,':',1) as hour, count(*) from darpa_full group by src_ip, dest_ip, date, split_part(time,':',1)) To '/afs/andrew.cmu.edu/usr13/marora/private/15826/15-826-Multimedia-Project/data/darpa_full_time.csv' With CSV DELIMITER ',';
 
 ### Creating User defined functions
  Example: 
