@@ -46,11 +46,11 @@ def createInputTable(cur):
         cur.execute(sql_query)
         sql_query = "UPDATE input_table SET Attr" + str(dimension - 1) + " = " + "split_part(Attr" + str(dimension - 1) + ", '-', 1)";
         cur.execute(sql_query)
-        if BINARIZE == False and GRANULARITY == "Date":
+        if BINARIZE == False and GRANULARITY == "date":
             segment = "Select Attr0, Attr1, Attr2, count(*) From input_table group by Attr0, Attr1, Attr2"
-        elif BINARIZE == True and GRANULARITY == "Date":
+        elif BINARIZE == True and GRANULARITY == "date":
             segment = "Select Attr0, Attr1, Attr2," + str(1) + " From input_table"
-        elif BINARIZE == True and GRANULARITY == "Time":
+        elif BINARIZE == True and GRANULARITY == "time":
             segment = "Select Attr0, Attr1, Attr2, Attr3," + str(1) + " From input_table"
         else:
             return
@@ -68,9 +68,9 @@ def dropTable(cur, tables):
     for table in tables:
         try:
             cur.execute("DROP TABLE IF EXISTS input_table")
-            sys.stdout.write("Dropped " + table + "\n")
+            # sys.stdout.write("Dropped " + str(tables) + "\n")
         except Exception as e:
-            sys.exit("Dropping " + table + " failed\n" + str(e))
+            sys.exit("Dropping " + str(tables) + " failed\n" + str(e))
 
 def main():
     conn, cur = connectDB()

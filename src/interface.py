@@ -25,25 +25,6 @@ def closeDB(conn):
     except Exception as e:
         sys.exit("Closing connection to DB failed\n" + str(e))
 
-# def createInputTable(cur):
-#     try:
-#         inp_param = ''
-#         for i in range(int(NUM_ATTRIBUTES_TEMP)):
-#             tmp = 'Attr' + str(i) + ' VARCHAR, '
-#             inp_param += tmp
-#         inp_param = inp_param[:-2]
-#         inp_param = 'CREATE TABLE temp_table(' + inp_param + ')'
-#         cur.execute(inp_param)
-#         sys.stdout.write("Input Table - " + inp_param +  " created\n")
-#         inp_param = "COPY temp_table FROM '" + INPUT_CSV + "' DELIMITER AS '" + INPUT_DELIMITER + "' CSV"
-#         cur.execute(inp_param)
-#         sys.stdout.write("Data from CSV input to the input_table\n")
-#         sql_query = "create table input_table as select Attr0, Attr1, Attr2, count(*) as count from temp_table group by Attr0, Attr1, Attr2"
-#         cur.execute(sql_query)
-
-#     except Exception as e:
-#         sys.exit("Input table creation failed\n" + str(e))
-
 #### Function to read input csv and create table
 # Example:
 #  001.002.003.004 , 172.016.112.050 , 06/03/1998 , 15
@@ -83,6 +64,6 @@ def dropTable(conn, tables):
     for table in tables:
         try:
             cur.execute("DROP TABLE IF EXISTS input_table")
-            sys.stdout.write("Dropped " + table + "\n")
+            # sys.stdout.write("Dropped " + str(table) + "\n")
         except Exception as e:
-            sys.exit("Dropping " + table + " failed\n" + str(e))
+            sys.exit("Dropping " + str(table) + " failed\n" + str(e))
