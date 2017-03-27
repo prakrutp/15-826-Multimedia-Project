@@ -17,7 +17,7 @@ def connectDB():
         sys.exit("Unable to connect to the database\n" + str(e))
 
     cur = conn.cursor()
-    sys.stdout.write("Established connection to the database\n")
+    # sys.stdout.write("Established connection to the database\n")
     return conn, cur
 
 def closeDB(cur, conn):
@@ -25,7 +25,7 @@ def closeDB(cur, conn):
         cur.close()
         if conn is not None:
             conn.close()
-        sys.stdout.write("Closed connection to the database\n")
+        # sys.stdout.write("Closed connection to the database\n")
     except Exception as e:
         sys.exit("Closing connection to DB failed\n" + str(e))
 
@@ -33,9 +33,8 @@ def createInputTable(cur):
     try:
         inp_param = ''
         rdr = csv.reader(open(RAW_INPUT))
-        line1 = rdr.next() # in Python 2, or next(rdr) in Python 3
+        line1 = rdr.next()
         dimension = len(line1) - 1
-        #TODO record dimension somehow
         for i in range(dimension + 1):
             tmp = 'Attr' + str(i) + ' VARCHAR, '
             inp_param += tmp
@@ -64,19 +63,6 @@ def createInputTable(cur):
         return 'input_table'
     except Exception as e:
         sys.exit("Input table creation failed\n" + str(e))
-
-
-def createOutputTable(cur):
-    try:
-        sql_query = ''
-        for i in range(int(NUM_ATTRIBUTES)):
-            tmp = 'Attr' + str(i) + ' VARCHAR, '
-            sql_query += tmp
-        sql_query = 'CREATE TABLE ' + OUTPUT_TABLE_NAME + '(blockId INTEGER, ' + sql_query + 'count INTEGER)'
-        cur.execute(sql_query)
-        sys.stdout.write("Output Table - " + OUTPUT_TABLE_NAME +  " created\n")
-    except Exception as e:
-        sys.exit("Output table creation failed\n" + str(e))
 
 def dropTable(cur, tables):
     for table in tables:
