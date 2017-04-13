@@ -8,6 +8,7 @@ from block_functions import *
 from density import *
 from policies import *
 import copy
+import time
 
 #-------- WRITE OUTPUT ----------
 def writeBlockDensity(output, block_density, block_num):
@@ -142,6 +143,7 @@ def main():
 	sys.stdout.write("Trying to find " + str(NUM_DENSE_BLOCKS) + ' blocks\nDensity Measure Used: ' + DENSITY_MEASURE + '\nPolicy Used: ' + POLICY + '\n')
 
 	#-------- ALGORITHM 1 ----------
+	startTime = time.time()
 	dimension = NUM_ATTRIBUTES
 	tableCopy(conn, 'input_table', 'original_input_table')
 	attributes = findAttributes(conn, 'input_table')[:-1]
@@ -166,7 +168,8 @@ def main():
 		print "Block found with Density ", block_density
 		block_densities.append(block_density)
 		writeBlockDensity(output, block_density, block_num)
-
+	endTime = time.time()
+	sys.stdout.write("Total time taken by algorithm: "+str(endTime - startTime)+'\n')
 	sys.stdout.write("Number of dense blocks found: " + str(block_num+1) + '\n')
 
 	# cur.execute("SELECT * FROM " + OUTPUT_TABLE_NAME + " LIMIT 10")		#*

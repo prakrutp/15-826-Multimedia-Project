@@ -46,6 +46,7 @@ def createInputTable(cur):
         cur.execute(sql_query)
         sql_query = "UPDATE input_table SET Attr" + str(dimension - 1) + " = " + "split_part(Attr" + str(dimension - 1) + ", '-', 1)";
         cur.execute(sql_query)
+        print 'update table'
         if BINARIZE == False and GRANULARITY == "date":
             segment = "Select Attr0, Attr1, Attr2, count(*) From input_table group by Attr0, Attr1, Attr2"
         elif BINARIZE == True and GRANULARITY == "date":
@@ -56,6 +57,7 @@ def createInputTable(cur):
             return
         sql_query = "Copy (" + segment + ") To '"+ INPUT_CSV +"' With CSV DELIMITER ','";
         cur.execute(sql_query)
+        print 'csv done'
         # cur.execute("SELECT * FROM input_table LIMIT 10")
         # records = cur.fetchall()
         # pprint.pprint(records)
