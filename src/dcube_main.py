@@ -60,6 +60,7 @@ def findSingleBlock(conn, name, distinctValuesForAttributes, mass, attributes, r
 	        sql_query = "INSERT INTO order_ VALUES (" + str(i) + ", '" + val[0] + "', 0)"
 	        cur1.execute(sql_query)
 	
+	cur.execute("CREATE INDEX index_order_ ON order_ (attr_no, attr_val)");
 	iterno = 0
 	while(checkEmptyCardinalities(conn, distinctValuesForAttributes_B)):
 		iterno +=1
@@ -135,7 +136,6 @@ def main():
 	cur = conn.cursor()
 	interface.createInputTable(conn)
 	interface.createOutputTable(conn)
-	print OUTPUT_LOCATION
 	output = open(OUTPUT_LOCATION, 'w')
 	# cur.execute('SELECT * FROM input_table limit 10')
 	# records = cur.fetchall()
@@ -145,10 +145,11 @@ def main():
 	#-------- ALGORITHM 1 ----------
 	startTime = time.time()
 	dimension = NUM_ATTRIBUTES
-	tableCopy(conn, 'input_table', 'original_input_table')
 	attributes = findAttributes(conn, 'input_table')[:-1]
+	#cur.execute("CREATE INDEX index_input_table ON input_table ("+ attributes[0][0] + "," + attributes[1][0] +")");
+	tableCopy(conn, 'input_table', 'original_input_table')
 	distinctValuesForAttributes_R, cardinalities_R = findCardinalities(conn, 'input_table', attributes)
-	mass_R = findMass(conn, 'input_table')
+	# mass_R = findMass(conn, 'input_table')
 	block_num = 0; block_densities = []
 
 	for block_num in xrange(NUM_DENSE_BLOCKS):

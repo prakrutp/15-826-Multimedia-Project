@@ -20,6 +20,8 @@ def findCardinalities(conn, name, attributes):
             sql_query = "INSERT INTO distinctValuesForAttributes VALUES (" + str(i) + ", '" + val[0] + "', 0, false)"
             cur1.execute(sql_query)
             cardinalities[i] += 1
+    #INDEX distinctValuesForAttributes
+    cur.execute("CREATE INDEX index_distinctValuesForAttributes ON distinctValuesForAttributes (attr_no, attr_val)");
     cur1.close()
     cur.close()
     return 'distinctValuesForAttributes', cardinalities
@@ -86,7 +88,8 @@ def getAttributeValuesMass(conn, name, attributes, distinctValuesForAttributes):
 def tableCopy(conn, name, new_name):
     cur = conn.cursor()
     cur.execute("DROP TABLE IF EXISTS " + new_name)
-    cur.execute("CREATE TABLE " + new_name + " AS SELECT * FROM " + name)
+    cur.execute("CREATE TABLE " + new_name + " LIKE " + name)
+    cur.execute("INSERT " + new_name  + " SELECT * FROM " + name)
     cur.close()
 
 def filterTable(conn, name, attributes, rFinal):
