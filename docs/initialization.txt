@@ -86,6 +86,17 @@ Copy (select src_ip, dest_ip, date,split_part(time,':',1) as hour, count(*) from
  psql -U marora -d test -a -f src/test.sql (Check the file path)
 
 
-
+Density Measure Used: A
+Policy Used: D
+*** Finding Block 0
+Block found with Density  78.0
+*** Finding Block 1
+Block found with Density  11.0
+*** Finding Block 2
+Block found with Density  2.14285714286
+*** Finding Block 3
+Block found with Density  1.36363636364
+Total time taken by algorithm: 0.629688024521
+Number of dense blocks found: 4
 
 
