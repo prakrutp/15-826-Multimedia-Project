@@ -15,7 +15,7 @@ def findCardinalities(conn, name, attributes):
     cur.execute(sql_query)
     cur1 = conn.cursor()
     for i, attribute in enumerate(attributes):
-        cur.execute("SELECT DISTINCT " + attribute[0] +" FROM " + name + " WHERE flag = TRUE")
+        cur.execute("SELECT DISTINCT " + attribute[0] +" FROM " + name)
         for val in cur:
             sql_query = "INSERT INTO distinctValuesForAttributes VALUES (" + str(i) + ", '" + val[0] + "', 0, false)"
             cur1.execute(sql_query)
@@ -48,7 +48,7 @@ def findNewBlockCardinalitiesFromTable(conn, attributes, rFinal):
 
 def findMass(conn, name):
     cur = conn.cursor()
-    cur.execute("SELECT SUM(count) FROM "+ name + " WHERE flag = TRUE")
+    cur.execute("SELECT SUM(count) FROM "+ name)
     result = cur.fetchall()[0][0]
     if result==None:
         return 0
@@ -73,7 +73,7 @@ def getAttributeValuesMass(conn, name, attributes, distinctValuesForAttributes):
     cur.execute("SELECT * FROM " + distinctValuesForAttributes)
     
     for row in cur:
-        sql_query = "SELECT SUM(count) FROM " + name + " WHERE " + attributes[row[0]][0] + "='" + row[1] + "' AND flag = TRUE AND b_flag = TRUE"
+        sql_query = "SELECT SUM(count) FROM " + name + " WHERE " + attributes[row[0]][0] + "='" + row[1] + "' AND b_flag = TRUE"
         cur1.execute(sql_query)
         result = cur1.fetchall()[0][0]
         if result==None:
@@ -102,13 +102,13 @@ def filterTable(conn, name, attributes, rFinal):
     cur.close()
     return
 
-def filterTable_impl2(conn, name, attributes, rFinal):
-    cur = conn.cursor()
-    where_clause = ''
-    for i, attribute in enumerate(attributes):
-        sql_query = "SELECT attr_val FROM order_ WHERE attr_order >= " + str(rFinal) + " AND attr_no = " + str(i)      #
-        where_clause += attributes[i][0] + " IN (" + sql_query + ") AND "
-    cur.execute("UPDATE " + name + " SET flag = FALSE WHERE " + where_clause + "flag = TRUE")
-    cur.close()
-    return
+# def filterTable_impl2(conn, name, attributes, rFinal):
+#     cur = conn.cursor()
+#     where_clause = ''
+#     for i, attribute in enumerate(attributes):
+#         sql_query = "SELECT attr_val FROM order_ WHERE attr_order >= " + str(rFinal) + " AND attr_no = " + str(i)      #
+#         where_clause += attributes[i][0] + " IN (" + sql_query + ") AND "
+#     cur.execute("UPDATE " + name + " SET flag = FALSE WHERE " + where_clause + "flag = TRUE")
+#     cur.close()
+#     return
 
