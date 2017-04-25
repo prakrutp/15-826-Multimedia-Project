@@ -59,19 +59,29 @@ def findSingleBlock(conn, name, distinctValuesForAttributes, mass, attributes, r
 		
 		sql_query = "SELECT * FROM " + distinctValuesForAttributes_B + " WHERE attr_no = " + str(dim) + " and attr_flag = true ORDER BY attr_mass"
 		cur.execute(sql_query)
+
+		temp = []
 		for i, candidate in enumerate(cur):
 
 			mass_B -= int(candidate[2])
 			cardinalities[dim] -= 1
 			newDensity = getDensity(rho, N, cardinalities, mass_B, cardinalities_R, mass)
-			
-			sql_query = "UPDATE order_ SET attr_order = " + str(r) + " WHERE attr_no = " + str(dim) + " and attr_val = '"+ candidate[1] + "'"
-			cur1.execute(sql_query)
+			temp.append("('"+str(candidate[1])+"',"+str(r)+')')
 			r += 1
 			if newDensity > currDensity:
 				currDensity = newDensity
 				rFinal = r
-		
+
+		cur.execute("DROP TABLE IF EXISTS temp")
+		sql_query = "CREATE TABLE temp(attr_val VARCHAR, attr_order INTEGER)"
+		cur.execute(sql_query)
+		sql_query = "INSERT INTO temp VALUES " + ','.join(temp)
+		cur.execute(sql_query)
+
+		sql_query = "UPDATE order_ SET attr_order = t.attr_order FROM (SELECT attr_val, attr_order from temp)" + \
+					" AS t WHERE order_.attr_no = " + str(dim) + " AND order_.attr_val=t.attr_val"	
+		cur.execute(sql_query)
+
 		sql_query = "DELETE FROM block WHERE " + attributes[dim][0] + " IN (SELECT attr_val FROM " + \
 		 distinctValuesForAttributes_B + " WHERE attr_no = " + str(dim) + " and attr_flag = true)"
 		cur.execute(sql_query)
