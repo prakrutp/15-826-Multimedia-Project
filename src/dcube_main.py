@@ -29,6 +29,7 @@ def extractBlock(conn, name, attributes, rFinal, block_num):
 #-------- ALGORITHM 2 ----------
 def findSingleBlock(conn, name, distinctValuesForAttributes, mass, attributes, rho, policy):
 	cur = conn.cursor()
+	cur1 = conn.cursor()
 	tableCopy(conn, name, 'block')
 	mass_B = copy.deepcopy(mass)
 	distinctValuesForAttributes_B = 'distinctValuesForAttributes_B'
@@ -50,14 +51,8 @@ def findSingleBlock(conn, name, distinctValuesForAttributes, mass, attributes, r
 	r = 1
 	rFinal = 1
 	cur.execute("DROP TABLE IF EXISTS order_")
-	sql_query = "CREATE TABLE order_(attr_no INTEGER, attr_val VARCHAR, attr_order INTEGER)"
+	sql_query = "CREATE TABLE order_ AS (SELECT attr_no, attr_val, 0 as attr_order from distinctValuesForAttributes)"
 	cur.execute(sql_query)
-	cur1 = conn.cursor()
-	for i, attribute in enumerate(attributes):
-	    cur.execute("SELECT DISTINCT " + attribute[0] +" FROM " + name)
-	    for val in cur:
-	        sql_query = "INSERT INTO order_ VALUES (" + str(i) + ", '" + val[0] + "', 0)"
-	        cur1.execute(sql_query)
 	
 	iterno = 0
 	while(checkEmptyCardinalities(conn, distinctValuesForAttributes_B)):
@@ -94,8 +89,6 @@ def findSingleBlock(conn, name, distinctValuesForAttributes, mass, attributes, r
 			# print "------ Iter no of for loop: ", i 		#*
 
 			mass_B -= int(candidate[2])
-			sql_query = "DELETE FROM " + distinctValuesForAttributes_B + " WHERE attr_no = " + str(dim) + " and attr_val = '"+ candidate[1] + "'"
-			cur1.execute(sql_query)
 			cardinalities[dim] -= 1
 			newDensity = getDensity(rho, N, cardinalities, mass_B, cardinalities_R, mass)
 
@@ -114,9 +107,12 @@ def findSingleBlock(conn, name, distinctValuesForAttributes, mass, attributes, r
 				currDensity = newDensity
 				rFinal = r
 
-			sql_query = "DELETE FROM block WHERE " + attributes[dim][0] + " = '" + candidate[1] + "'"
-			cur1.execute(sql_query)
-
+		
+		sql_query = "DELETE FROM block WHERE " + attributes[dim][0] + " IN (SELECT attr_val FROM " + \
+		 distinctValuesForAttributes_B + " WHERE attr_no = " + str(dim) + " and attr_flag = true)"
+		cur.execute(sql_query)
+		sql_query = "DELETE FROM " + distinctValuesForAttributes_B + " WHERE attr_no = " + str(dim) + " and attr_flag = true"
+		cur.execute(sql_query)
 		# print "Order: ",		#*
 		# cur.execute("SELECT * FROM order_")		#*
 		# records = cur.fetchall()		#*

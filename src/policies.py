@@ -6,7 +6,6 @@ def selectDimensionbyDensity(conn, inpDistinctValuesForAttributes, mass, rho, ca
 	currDensity = -1
 	dimFinal = 0
 	cur = conn.cursor()
-	cur1 = conn.cursor()
 	new_table = 'distinctValuesForAttributes_ds'
 
 	for dim in xrange(len(cardinalities_R)):
@@ -25,15 +24,14 @@ def selectDimensionbyDensity(conn, inpDistinctValuesForAttributes, mass, rho, ca
 			cur.execute(sql_query)
 			for i, candidate in enumerate(cur):
 				mass_updated -= int(candidate[2])
-				sql_query = "DELETE FROM " + new_table + " WHERE attr_no = " + str(dim) + " and attr_val = '"+ candidate[1] + "'"
-				cur1.execute(sql_query)
 				cardinalities[dim] -= 1
 				newDensity = getDensity(rho, len(cardinalities), cardinalities, mass_updated, cardinalities_R, mass_R)
+			sql_query = "DELETE FROM " + new_table + " WHERE attr_no = " + str(dim) + " and attr_flag = true"
+			cur.execute(sql_query)
 			if newDensity >= currDensity:
 				currDensity = newDensity
 				dimFinal = dim
 	cur.execute("DROP TABLE IF EXISTS " + new_table)
-	cur1.close()
 	cur.close()
 	return dimFinal
 

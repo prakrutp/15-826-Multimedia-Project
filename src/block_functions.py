@@ -12,15 +12,17 @@ def findCardinalities(conn, name, attributes):
     cardinalities = [0]*len(attributes)
     cur.execute("DROP TABLE IF EXISTS distinctValuesForAttributes")
     sql_query = 'CREATE TABLE distinctValuesForAttributes(attr_no INTEGER, attr_val VARCHAR, attr_mass INTEGER, attr_flag Boolean)'
+    # print sql_query, "4"
     cur.execute(sql_query)
-    cur1 = conn.cursor()
     for i, attribute in enumerate(attributes):
-        cur.execute("SELECT DISTINCT " + attribute[0] +" FROM " + name)
-        for val in cur:
-            sql_query = "INSERT INTO distinctValuesForAttributes VALUES (" + str(i) + ", '" + val[0] + "', 0, false)"
-            cur1.execute(sql_query)
-            cardinalities[i] += 1
-    cur1.close()
+        attribute[0]
+        sql_query = "INSERT INTO distinctValuesForAttributes SELECT " + str(i) + ", " + attribute[0] + \
+                    ", 0, false FROM input_table GROUP BY " + attribute[0]
+        # print sql_query, "5"
+        cur.execute(sql_query)
+        sql_query = "SELECT COUNT(DISTINCT " + attribute[0] +") FROM " + name
+        cur.execute(sql_query)
+        cardinalities[i] = int(cur.fetchall()[0][0])
     cur.close()
     return 'distinctValuesForAttributes', cardinalities
 
@@ -67,20 +69,14 @@ def checkEmptyCardinalities(conn, distinctValuesForAttributes):
 
 def getAttributeValuesMass(conn, name, attributes, distinctValuesForAttributes):
     cur = conn.cursor()
-    cur1 = conn.cursor()
-    cur.execute("SELECT * FROM " + distinctValuesForAttributes)
-    
-    for row in cur:
-        sql_query = "SELECT SUM(count) FROM " + name + " WHERE " + attributes[row[0]][0] + "='" + row[1] + "'"
-        cur1.execute(sql_query)
-        result = cur1.fetchall()[0][0]
-        if result==None:
-            mass = 0
-        else:
-            mass = int(result)
-        sql_query = "UPDATE " +  distinctValuesForAttributes + " SET attr_mass = " + str(mass) + " WHERE attr_no = " + str(row[0]) + " and attr_val = '" + row[1] + "'"
-        cur1.execute(sql_query)
-    cur1.close()
+    sql_query = "UPDATE " + distinctValuesForAttributes + " SET attr_mass = 0"
+    cur.execute(sql_query)
+    for i, attribute in enumerate(attributes):
+        sql_query = "UPDATE " + distinctValuesForAttributes + " SET attr_mass = tab.sc FROM (SELECT " + \
+                attribute[0] + " AS attr_val_, sum(count) AS sc FROM " + name + " GROUP BY " + attribute[0] + \
+                ") tab WHERE attr_no = " + str(i) + " AND attr_val = tab.attr_val_"
+        # print sql_query,"9.."
+        cur.execute(sql_query)
     cur.close()
 
 def tableCopy(conn, name, new_name):
